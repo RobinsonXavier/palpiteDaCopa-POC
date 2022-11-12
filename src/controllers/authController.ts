@@ -61,9 +61,17 @@ async function signin (req: Request, res: Response) {
         const token: string = uuidv4();
         const userId: number = user.rows[0].id;
 
+        const verifySession = await authRepository.searchSession(userId);
+
+        if (verifySession.rows[0]) {
+            return res.status(409).send("User is already logged in")
+        }
+
         await authRepository.loginUser(userId, token);
 
-        return res.status(200).send("logged");
+        return res.status(200).send({
+            token
+        });
 
     } catch (error) {
         console.log(error);

@@ -18,8 +18,14 @@ async function loginUser(userId: number, token: string) {
 
 }
 
+async function searchSession(userId: number) {
+    return await connection.query(`SELECT * FROM sessions WHERE "userId" = $1;`
+    , [userId]);
+}
+
 export {
     insertUser,
     searchEmail,
-    loginUser
+    loginUser,
+    searchSession
 };
