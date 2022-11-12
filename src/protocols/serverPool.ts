@@ -2,6 +2,6 @@ export type ServerPool = {
     user: string,
     password: string,
     host: string,
-    port: number,
+    port: string,
     database: string,
 }
