@@ -64,7 +64,7 @@ async function signin (req: Request, res: Response) {
         await authRepository.loginUser(userId, token);
 
         return res.status(200).send("logged");
-        
+
     } catch (error) {
         console.log(error);
         return res.sendStatus(500);
@@ -76,5 +76,4 @@ async function signin (req: Request, res: Response) {
 export {
     signin,
     signup,
-
 };

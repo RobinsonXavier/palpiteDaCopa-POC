@@ -46,4 +46,27 @@ function insertUser(name, email, password) {
     });
 }
 ;
-export { insertUser };
+function searchEmail(email) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connection.query("SELECT * FROM users WHERE users.email = $1;", [email])];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+function loginUser(userId, token) {
+    return __awaiter(this, void 0, void 0, function () {
+        var status;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    status = Date.now();
+                    return [4 /*yield*/, connection.query("INSERT INTO sessions (\"userId\", token, \"lastStatus\") VALUES ($1, $2, $3);", [userId, token, status])];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+export { insertUser, searchEmail, loginUser };

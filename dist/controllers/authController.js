@@ -35,11 +35,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 import * as authRepository from '../repository/authRepository.js';
 import signupSchema from '../schemas/signupSchema.js';
+import signinSchema from '../schemas/signinSchema.js';
 function signup(req, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, name, email, password, error, hashPassword, error_1;
+        var _a, name, email, password, error, hashPassword, result, error_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -53,17 +55,22 @@ function signup(req, res) {
                     hashPassword = bcrypt.hashSync(password, 10);
                     _b.label = 1;
                 case 1:
-                    _b.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, authRepository.insertUser(name, email, hashPassword)];
+                    _b.trys.push([1, 4, , 5]);
+                    return [4 /*yield*/, authRepository.searchEmail(email)];
                 case 2:
-                    _b.sent();
-                    res.status(201).send("User created");
-                    return [3 /*break*/, 4];
+                    result = _b.sent();
+                    if (result.rows[0]) {
+                        return [2 /*return*/, res.status(409).send("Email has already been registered")];
+                    }
+                    return [4 /*yield*/, authRepository.insertUser(name, email, hashPassword)];
                 case 3:
+                    _b.sent();
+                    return [2 /*return*/, res.status(201).send("User created")];
+                case 4:
                     error_1 = _b.sent();
                     console.log(error_1);
                     return [2 /*return*/, res.sendStatus(500)];
-                case 4: return [2 /*return*/];
+                case 5: return [2 /*return*/];
             }
         });
     });
@@ -71,19 +78,41 @@ function signup(req, res) {
 ;
 function signin(req, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, email, password;
+        var _a, email, password, error, user, verifyPassword, token, userId, error_2;
         return __generator(this, function (_b) {
-            _a = req.body, email = _a.email, password = _a.password;
-            try {
-                return [2 /*return*/, res.sendStatus(200)];
+            switch (_b.label) {
+                case 0:
+                    _a = req.body, email = _a.email, password = _a.password;
+                    error = signinSchema.validate(req.body).error;
+                    if (error) {
+                        return [2 /*return*/, res.status(400).send({
+                                message: error.message
+                            })];
+                    }
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 4, , 5]);
+                    return [4 /*yield*/, authRepository.searchEmail(email)];
+                case 2:
+                    user = _b.sent();
+                    verifyPassword = bcrypt.compareSync(password, user.rows[0].password);
+                    if (!verifyPassword) {
+                        return [2 /*return*/, res.status(401).send("email or password incorrect")];
+                    }
+                    token = uuidv4();
+                    userId = user.rows[0].id;
+                    return [4 /*yield*/, authRepository.loginUser(userId, token)];
+                case 3:
+                    _b.sent();
+                    return [2 /*return*/, res.status(200).send("logged")];
+                case 4:
+                    error_2 = _b.sent();
+                    console.log(error_2);
+                    return [2 /*return*/, res.sendStatus(500)];
+                case 5: return [2 /*return*/];
             }
-            catch (error) {
-                console.log(error);
-                return [2 /*return*/, res.sendStatus(500)];
-            }
-            return [2 /*return*/];
         });
     });
 }
 ;
-export { signin, signup };
+export { signin, signup, };
