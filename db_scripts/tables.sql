@@ -24,3 +24,10 @@ CREATE TABLE "bets" (
 	"gameId" INTEGER REFERENCES "games"("id") NOT NULL,
 	"bet" VARCHAR(5) NOT NULL
 );
+
+CREATE TABLE "sessions" (
+	"id" SERIAL PRIMARY KEY,
+	"userId" INTEGER REFERENCES "users"("id") UNIQUE NOT NULL,
+	"token" VARCHAR(255) UNIQUE NOT NULL,
+	"lastStatus" BIGINT NOT NULL
+);

@@ -10,7 +10,16 @@ async function searchEmail(email:string) {
     , [email]);
 }
 
+async function loginUser(userId: number, token: string) {
+    const status = Date.now();
+
+    return await connection.query(`INSERT INTO sessions ("userId", token, "lastStatus") VALUES ($1, $2, $3);`
+    , [userId, token, status]);
+
+}
+
 export {
     insertUser,
-    searchEmail
+    searchEmail,
+    loginUser
 };
