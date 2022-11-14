@@ -78,7 +78,7 @@ function signup(req, res) {
 ;
 function signin(req, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, email, password, error, user, verifyPassword, token, userId, error_2;
+        var _a, email, password, error, user, verifyPassword, token, userId, verifySession, error_2;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -91,7 +91,7 @@ function signin(req, res) {
                     }
                     _b.label = 1;
                 case 1:
-                    _b.trys.push([1, 4, , 5]);
+                    _b.trys.push([1, 5, , 6]);
                     return [4 /*yield*/, authRepository.searchEmail(email)];
                 case 2:
                     user = _b.sent();
@@ -101,15 +101,23 @@ function signin(req, res) {
                     }
                     token = uuidv4();
                     userId = user.rows[0].id;
-                    return [4 /*yield*/, authRepository.loginUser(userId, token)];
+                    return [4 /*yield*/, authRepository.searchSession(userId)];
                 case 3:
-                    _b.sent();
-                    return [2 /*return*/, res.status(200).send("logged")];
+                    verifySession = _b.sent();
+                    if (verifySession.rows[0]) {
+                        return [2 /*return*/, res.status(409).send("User is already logged in")];
+                    }
+                    return [4 /*yield*/, authRepository.loginUser(userId, token)];
                 case 4:
+                    _b.sent();
+                    return [2 /*return*/, res.status(200).send({
+                            token: token
+                        })];
+                case 5:
                     error_2 = _b.sent();
                     console.log(error_2);
                     return [2 /*return*/, res.sendStatus(500)];
-                case 5: return [2 /*return*/];
+                case 6: return [2 /*return*/];
             }
         });
     });

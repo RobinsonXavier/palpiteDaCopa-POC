@@ -51,14 +51,14 @@ async function createBets(req: Request, res: Response) {
         await betRepository.insertBet(Number(userId), gameId, bet);
 
         return res.status(201).send('Good luck');
-        
+
     } catch (error) {
         console.log(error);
         return res.sendStatus(500);
     }
 };
 
-async function updateBet( req: Request, res: Response) {
+async function updateBets( req: Request, res: Response) {
     const { betId } = req.params as { betId: string };
     const { bet } = req.body as { bet: string };
 
@@ -79,8 +79,29 @@ async function updateBet( req: Request, res: Response) {
     }
 };
 
+async function deleteBets(req: Request, res: Response) {
+    const { betId } = req.params as { betId: string };
+
+    try {
+        const betCheck: QueryResult = await betRepository.checkBet(Number(betId));
+
+        if (!betCheck.rows[0]) {
+            return res.sendStatus(404);
+        }
+
+        await betRepository.deleteBet(Number(betId));
+
+        return res.status(200).send('Bet deleted');
+
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
+};
+
 export {
     getBets,
     createBets,
-    updateBet
+    updateBets,
+    deleteBets
 };

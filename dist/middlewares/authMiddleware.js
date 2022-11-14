@@ -34,60 +34,29 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import connection from "../database/db.js";
-function insertUser(name, email, password) {
+import { searchToken } from '../repository/authRepository.js';
+function authToken(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("INSERT INTO users (name, email, password, hits) VALUES ($1, $2, $3, $4);", [name, email, password, 0])];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-;
-function searchEmail(email) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("SELECT * FROM users WHERE users.email = $1;", [email])];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-function loginUser(userId, token) {
-    return __awaiter(this, void 0, void 0, function () {
-        var status;
+        var authorization, token, result, userId;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    status = Date.now();
-                    return [4 /*yield*/, connection.query("INSERT INTO sessions (\"userId\", token, \"lastStatus\") VALUES ($1, $2, $3);", [userId, token, status])];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-function searchSession(userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("SELECT * FROM sessions WHERE \"userId\" = $1;", [userId])];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-function searchToken(token) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("SELECT * FROM sessions WHERE token = $1;", [token])];
-                case 1: return [2 /*return*/, _a.sent()];
+                    authorization = req.headers.authorization;
+                    token = authorization === null || authorization === void 0 ? void 0 : authorization.replace('Bearer ', '');
+                    return [4 /*yield*/, searchToken(token)];
+                case 1:
+                    result = _a.sent();
+                    if (!result.rows[0]) {
+                        return [2 /*return*/, res.sendStatus(401)];
+                    }
+                    userId = result.rows[0].userId;
+                    res.locals.token = token;
+                    res.locals.userId = userId;
+                    next();
+                    return [2 /*return*/];
             }
         });
     });
 }
 ;
-export { insertUser, searchEmail, loginUser, searchSession, searchToken };
+export { authToken };

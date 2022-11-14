@@ -31,12 +31,18 @@ async function checkBet(betId: number): Promise<QueryResult> {
     , [betId]);
 }
 
+async function deleteBet(betId: number): Promise<QueryResult>  {
+    return await connection.query(`DELETE bets WHERE id = $1;`
+    , [betId]);
+}
+
 export {
     listBets,
     insertBet,
     checkUser,
     checkGame,
     checkBet,
-    updateBet
+    updateBet,
+    deleteBet
 }
 

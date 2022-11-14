@@ -35,59 +35,78 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import connection from "../database/db.js";
-function insertUser(name, email, password) {
+function listBets(userId) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("INSERT INTO users (name, email, password, hits) VALUES ($1, $2, $3, $4);", [name, email, password, 0])];
+                case 0: return [4 /*yield*/, connection.query("SELECT * FROM bets WHERE \"userId\" = $1;", [userId])];
                 case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
 }
 ;
-function searchEmail(email) {
+function checkUser(userId) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("SELECT * FROM users WHERE users.email = $1;", [email])];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-function loginUser(userId, token) {
-    return __awaiter(this, void 0, void 0, function () {
-        var status;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    status = Date.now();
-                    return [4 /*yield*/, connection.query("INSERT INTO sessions (\"userId\", token, \"lastStatus\") VALUES ($1, $2, $3);", [userId, token, status])];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-function searchSession(userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("SELECT * FROM sessions WHERE \"userId\" = $1;", [userId])];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-function searchToken(token) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("SELECT * FROM sessions WHERE token = $1;", [token])];
+                case 0: return [4 /*yield*/, connection.query("SELECT * FROM users WHERE id = $1;", [userId])];
                 case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
 }
 ;
-export { insertUser, searchEmail, loginUser, searchSession, searchToken };
+function checkGame(gameId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connection.query("SELECT * FROM games WHERE id = $1;", [gameId])];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+;
+function insertBet(userId, gameId, bet) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connection.query("INSERT INTO bets (\"userId\", \"gameId\", bet) VALUES ($1, $2, $3);", [userId, gameId, bet])];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+;
+function updateBet(betId, bet) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connection.query("UPDATE bets SET \"bet\"= $1 WHERE id = $2;", [bet, betId])];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+function checkBet(betId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connection.query("SELECT * FROM bets WHERE id = $1;", [betId])];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+function deleteBet(betId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connection.query("DELETE bets WHERE id = $1;", [betId])];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+export { listBets, insertBet, checkUser, checkGame, checkBet, updateBet, deleteBet };
