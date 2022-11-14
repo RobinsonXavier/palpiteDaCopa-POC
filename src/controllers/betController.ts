@@ -39,10 +39,40 @@ async function createBets(req: Request, res: Response) {
         if (!gameCheck.rows[0]) {
             return res.status(404).send('The game was not found');
         }
+
+        const bets: QueryResult = await betRepository.listBets(Number(userId));
+
+        const alreadyBet: dbTypesProtocols.dataBaseQueryBets = bets.rows.find( element => element.gameId === gameId);
+
+        if (alreadyBet) {
+            return res.status(409).send('You already bet on this game');
+        }
         
         await betRepository.insertBet(Number(userId), gameId, bet);
 
         return res.status(201).send('Good luck');
+        
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
+};
+
+async function updateBet( req: Request, res: Response) {
+    const { betId } = req.params as { betId: string };
+    const { bet } = req.body as { bet: string };
+
+    try {
+        const betCheck: QueryResult = await betRepository.checkBet(Number(betId));
+
+        if (!betCheck.rows[0]) {
+            return res.sendStatus(404);
+        }
+
+        await betRepository.updateBet(Number(betId), bet);
+
+        return res.status(200).send('Bet updated')
+        
     } catch (error) {
         console.log(error);
         return res.sendStatus(500);
@@ -51,5 +81,6 @@ async function createBets(req: Request, res: Response) {
 
 export {
     getBets,
-    createBets
+    createBets,
+    updateBet
 };
