@@ -84,6 +84,9 @@ function createBets(req, res) {
                     if (!gameCheck.rows[0]) {
                         return [2 /*return*/, res.status(404).send('The game was not found')];
                     }
+                    if (gameCheck.rows[0].status === 'closed') {
+                        return [2 /*return*/, res.status(401).send('Bets have already been settled for this game')];
+                    }
                     return [4 /*yield*/, betRepository.listBets(Number(userId))];
                 case 4:
                     bets = _b.sent();
@@ -166,4 +169,46 @@ function deleteBets(req, res) {
     });
 }
 ;
-export { getBets, createBets, updateBets, deleteBets };
+function betStatus(req, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var list, gameList_1, hits, numberHits, error_5;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 4, , 5]);
+                    return [4 /*yield*/, betRepository.listBets(res.locals.userId)];
+                case 1:
+                    list = _a.sent();
+                    if (!list.rows[0]) {
+                        return [2 /*return*/, res.sendStatus(404)];
+                    }
+                    return [4 /*yield*/, betRepository.listClosedGames()];
+                case 2:
+                    gameList_1 = _a.sent();
+                    hits = list.rows.filter(function (element) {
+                        for (var i = 0; i < gameList_1.rows.length; i++) {
+                            if (element.gameId === gameList_1.rows[i].id) {
+                                if (element.bet === gameList_1.rows[i].scoreBoard) {
+                                    return element;
+                                }
+                            }
+                        }
+                    });
+                    numberHits = hits.length;
+                    if (numberHits === 0) {
+                        return [2 /*return*/, res.status(200).send('You didn´t hit any bets')];
+                    }
+                    return [4 /*yield*/, betRepository.updateUserHits(numberHits, res.locals.userId)];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/, res.status(200).send("You hit ".concat(numberHits, " bets"))];
+                case 4:
+                    error_5 = _a.sent();
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
+;
+export { getBets, createBets, updateBets, deleteBets, betStatus };

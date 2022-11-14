@@ -22,7 +22,7 @@ async function insertBet(userId: number, gameId: number, bet: string): Promise<Q
 };
 
 async function updateBet(betId: number, bet: string): Promise<QueryResult>  {
-    return await connection.query(`UPDATE bets SET "bet"= $1 WHERE id = $2;`
+    return await connection.query(`UPDATE bets SET bet = $1 WHERE id = $2;`
     , [bet, betId]);
 }
 
@@ -32,8 +32,17 @@ async function checkBet(betId: number): Promise<QueryResult> {
 }
 
 async function deleteBet(betId: number): Promise<QueryResult>  {
-    return await connection.query(`DELETE bets WHERE id = $1;`
+    return await connection.query(`DELETE FROM bets WHERE id = $1;`
     , [betId]);
+}
+
+async function listClosedGames(): Promise<QueryResult>  {
+    return await connection.query(`SELECT * FROM games WHERE status = 'closed';`);
+};
+
+async function updateUserHits(hits: number, userId: number): Promise<QueryResult> {
+    return await connection.query(`UPDATE users SET hits = $1 WHERE id = $2;`
+    , [hits, userId]);
 }
 
 export {
@@ -43,6 +52,8 @@ export {
     checkGame,
     checkBet,
     updateBet,
-    deleteBet
+    deleteBet,
+    listClosedGames,
+    updateUserHits
 }
 

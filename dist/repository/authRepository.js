@@ -83,7 +83,7 @@ function searchToken(token) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("SELECT * FROM sessions WHERE token = $1;", [token])];
+                case 0: return [4 /*yield*/, connection.query("SELECT * FROM sessions WHERE token = ".concat(token, ";"))];
                 case 1: return [2 /*return*/, _a.sent()];
             }
         });

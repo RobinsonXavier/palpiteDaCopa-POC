@@ -25,8 +25,7 @@ async function searchSession(userId: number): Promise<QueryResult> {
 }
 
 async function searchToken(token: string): Promise<QueryResult> {
-    return await connection.query(`SELECT * FROM sessions WHERE token = $1;`
-    ,[token]);
+    return await connection.query(`SELECT * FROM sessions WHERE token = ${token};`);
 };
 
 export {

@@ -13,7 +13,9 @@ async function getBets(req: Request, res: Response) {
 
         return res.status(200).send({
             bets: result.rows
-        })
+        } as { 
+            bets: dbTypesProtocols.dataBaseQueryBets[] 
+        });
 
     } catch (error) {
         console.log(error);
@@ -38,6 +40,10 @@ async function createBets(req: Request, res: Response) {
 
         if (!gameCheck.rows[0]) {
             return res.status(404).send('The game was not found');
+        }
+
+        if (gameCheck.rows[0].status === 'closed') {
+            return res.status(401).send('Bets have already been settled for this game')
         }
 
         const bets: QueryResult = await betRepository.listBets(Number(userId));
@@ -99,9 +105,46 @@ async function deleteBets(req: Request, res: Response) {
     }
 };
 
+async function betStatus(req: Request, res: Response) {
+    
+    try {
+        const list: QueryResult = await betRepository.listBets(res.locals.userId);
+
+        if (!list.rows[0]) {
+            return res.sendStatus(404);
+        }
+
+        const gameList: QueryResult = await betRepository.listClosedGames();
+
+        const hits: dbTypesProtocols.dataBaseQueryBets[] = list.rows.filter( element => {
+            for (let i = 0; i < gameList.rows.length; i++) {
+                if (element.gameId === gameList.rows[i].id) {
+                    if(element.bet === gameList.rows[i].scoreBoard) {
+                        return element;
+                    }
+                } 
+            }
+        });
+
+        const numberHits: number = hits.length;
+
+        if (numberHits === 0) {
+            return res.status(200).send('You didn´t hit any bets');
+        }
+
+        await betRepository.updateUserHits(numberHits, res.locals.userId);
+
+        return res.status(200).send(`You hit ${numberHits} bets`);
+
+    } catch (error) {
+        
+    }
+};
+
 export {
     getBets,
     createBets,
     updateBets,
-    deleteBets
+    deleteBets,
+    betStatus
 };

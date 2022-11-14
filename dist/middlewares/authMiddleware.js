@@ -43,6 +43,9 @@ function authToken(req, res, next) {
                 case 0:
                     authorization = req.headers.authorization;
                     token = authorization === null || authorization === void 0 ? void 0 : authorization.replace('Bearer ', '');
+                    if (token.includes(';')) {
+                        return [2 /*return*/, res.sendStatus(401)];
+                    }
                     return [4 /*yield*/, searchToken(token)];
                 case 1:
                     result = _a.sent();

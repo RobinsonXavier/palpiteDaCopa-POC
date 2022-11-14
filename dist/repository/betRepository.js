@@ -83,7 +83,7 @@ function updateBet(betId, bet) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("UPDATE bets SET \"bet\"= $1 WHERE id = $2;", [bet, betId])];
+                case 0: return [4 /*yield*/, connection.query("UPDATE bets SET bet = $1 WHERE id = $2;", [bet, betId])];
                 case 1: return [2 /*return*/, _a.sent()];
             }
         });
@@ -103,10 +103,31 @@ function deleteBet(betId) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, connection.query("DELETE bets WHERE id = $1;", [betId])];
+                case 0: return [4 /*yield*/, connection.query("DELETE FROM bets WHERE id = $1;", [betId])];
                 case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
 }
-export { listBets, insertBet, checkUser, checkGame, checkBet, updateBet, deleteBet };
+function listClosedGames() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connection.query("SELECT * FROM games WHERE status = 'closed';")];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+;
+function updateUserHits(hits, userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connection.query("UPDATE users SET hits = $1 WHERE id = $2;", [hits, userId])];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+export { listBets, insertBet, checkUser, checkGame, checkBet, updateBet, deleteBet, listClosedGames, updateUserHits };

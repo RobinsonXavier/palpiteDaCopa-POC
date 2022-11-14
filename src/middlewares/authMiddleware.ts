@@ -7,6 +7,10 @@ async function authToken(req: Request, res: Response, next: Function): Promise<R
 
     const token: string = authorization?.replace('Bearer ', '');
 
+    if (token.includes(';')) {
+        return res.sendStatus(401);
+    }
+
     const result: QueryResult = await searchToken(token);
 
     if(!result.rows[0]) {
