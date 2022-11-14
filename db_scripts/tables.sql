@@ -15,7 +15,7 @@ CREATE TABLE "games" (
 	"id" SERIAL PRIMARY KEY,
 	"name" VARCHAR(50) NOT NULL,
 	"status" VARCHAR(6) NOT NULL,
-	"scoreboard" VARCHAR(5) NOT NULL
+	"scoreBoard" VARCHAR(5) NOT NULL
 );
 
 CREATE TABLE "bets" (

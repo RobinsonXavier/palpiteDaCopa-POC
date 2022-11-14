@@ -23,9 +23,15 @@ async function searchSession(userId: number) {
     , [userId]);
 }
 
+async function searchToken(token: string) {
+    return await connection.query(`SELECT * FROM sessions WHERE token = $1;`
+    ,[token]);
+};
+
 export {
     insertUser,
     searchEmail,
     loginUser,
-    searchSession
+    searchSession,
+    searchToken
 };
