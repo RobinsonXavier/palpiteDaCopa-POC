@@ -1,20 +1,18 @@
 import { Request, Response } from 'express';
-import { QueryResult } from 'pg';
+import { bets, users, games } from '@prisma/client';
 import * as betRepository from '../repository/betRepository.js';
 import * as dbTypesProtocols from '../protocols/dbTypesProtocols.js';
 
 async function getBets(req: Request, res: Response) {
     try {
-        const result: QueryResult = await betRepository.listBets(res.locals.userId);
+        const result = await betRepository.listBets(res.locals.userId);
 
-        if (!result.rows[0]) {
+        if (!result) {
             return res.sendStatus(404);
         }
 
         return res.status(200).send({
-            bets: result.rows
-        } as { 
-            bets: dbTypesProtocols.dataBaseQueryBets[] 
+            bets: result
         });
 
     } catch (error) {
@@ -30,25 +28,25 @@ async function createBets(req: Request, res: Response) {
 
     try {
 
-        const userCheck: QueryResult = await betRepository.checkUser(Number(userId));
+        const userCheck: users = await betRepository.checkUser(Number(userId));
 
-        if (!userCheck.rows[0]) {
+        if (!userCheck) {
             return res.sendStatus(401);
         }
 
-        const gameCheck: QueryResult = await betRepository.checkGame(gameId);
+        const gameCheck: games = await betRepository.checkGame(gameId);
 
-        if (!gameCheck.rows[0]) {
+        if (!gameCheck) {
             return res.status(404).send('The game was not found');
         }
 
-        if (gameCheck.rows[0].status === 'closed') {
+        if (gameCheck.status === 'closed') {
             return res.status(401).send('Bets have already been settled for this game')
         }
 
-        const bets: QueryResult = await betRepository.listBets(Number(userId));
+        const bets: bets[] = await betRepository.listBets(Number(userId));
 
-        const alreadyBet: dbTypesProtocols.dataBaseQueryBets = bets.rows.find( element => element.gameId === gameId);
+        const alreadyBet: bets = bets.find( element => element.gameId === gameId);
 
         if (alreadyBet) {
             return res.status(409).send('You already bet on this game');
@@ -69,9 +67,9 @@ async function updateBets( req: Request, res: Response) {
     const { bet } = req.body as { bet: string };
 
     try {
-        const betCheck: QueryResult = await betRepository.checkBet(Number(betId));
+        const betCheck: bets = await betRepository.checkBet(Number(betId));
 
-        if (!betCheck.rows[0]) {
+        if (!betCheck) {
             return res.sendStatus(404);
         }
 
@@ -89,9 +87,9 @@ async function deleteBets(req: Request, res: Response) {
     const { betId } = req.params as { betId: string };
 
     try {
-        const betCheck: QueryResult = await betRepository.checkBet(Number(betId));
+        const betCheck: bets = await betRepository.checkBet(Number(betId));
 
-        if (!betCheck.rows[0]) {
+        if (!betCheck) {
             return res.sendStatus(404);
         }
 
@@ -108,18 +106,18 @@ async function deleteBets(req: Request, res: Response) {
 async function betStatus(req: Request, res: Response) {
     
     try {
-        const list: QueryResult = await betRepository.listBets(res.locals.userId);
+        const list: bets[] = await betRepository.listBets(res.locals.userId);
 
-        if (!list.rows[0]) {
+        if (!list) {
             return res.sendStatus(404);
         }
 
-        const gameList: QueryResult = await betRepository.listClosedGames();
+        const gameList: games[] = await betRepository.listClosedGames();
 
-        const hits: dbTypesProtocols.dataBaseQueryBets[] = list.rows.filter( element => {
-            for (let i = 0; i < gameList.rows.length; i++) {
-                if (element.gameId === gameList.rows[i].id) {
-                    if(element.bet === gameList.rows[i].scoreBoard) {
+        const hits: bets[] = list.filter( element => {
+            for (let i = 0; i < gameList.length; i++) {
+                if (element.gameId === gameList[i].id) {
+                    if(element.bet === gameList[i].scoreBoard) {
                         return element;
                     }
                 } 
@@ -137,7 +135,8 @@ async function betStatus(req: Request, res: Response) {
         return res.status(200).send(`You hit ${numberHits} bets`);
 
     } catch (error) {
-        
+        console.log(error);
+        return res.sendStatus(500);
     }
 };
 

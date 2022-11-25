@@ -5,11 +5,11 @@ import * as authProtocols from '../protocols/authProtocols.js';
 import * as authRepository from '../repository/authRepository.js';
 import signupSchema from '../schemas/signupSchema.js';
 import signinSchema from '../schemas/signinSchema.js';
-import { QueryResult } from 'pg';
+import { signUp } from '../protocols/authProtocols.js';
 
 
 async function signup ( req: Request, res: Response) {
-    const { name, email, password } = req.body as authProtocols.signUpUser;
+    const { name, email, password } = req.body as authProtocols.signUp;
 
     const { error } = signupSchema.validate(req.body);
 
@@ -22,13 +22,21 @@ async function signup ( req: Request, res: Response) {
     const hashPassword: string = bcrypt.hashSync(password, 10);
 
     try {
-        const result: QueryResult = await authRepository.searchEmail(email);
 
-        if (result.rows[0]) {
+        const result = await authRepository.searchEmail(email);
+
+        if (result) {
             return res.status(409).send("Email has already been registered");
         }
 
-        await authRepository.insertUser(name, email, hashPassword);
+        const user: signUp = {
+            name,
+            email,
+            password: hashPassword,
+            hits:  0
+        }
+
+        await authRepository.insertUser(user);
 
         return res.status(201).send("User created");
     } catch (error) {
@@ -39,7 +47,7 @@ async function signup ( req: Request, res: Response) {
 };
 
 async function signin (req: Request, res: Response) {
-    const { email, password } = req.body as Pick<authProtocols.signUpUser, "email" | "password">;
+    const { email, password } = req.body as Pick<authProtocols.signUp, "email" | "password">;
 
     const { error } = signinSchema.validate(req.body);
 
@@ -51,20 +59,20 @@ async function signin (req: Request, res: Response) {
 
     try {
 
-        const user: QueryResult = await authRepository.searchEmail(email);
+        const user = await authRepository.searchEmail(email);
 
-        const verifyPassword: boolean = bcrypt.compareSync(password, user.rows[0].password);
+        const verifyPassword: boolean = bcrypt.compareSync(password, user.password);
 
         if (!verifyPassword) {
             return res.status(401).send("email or password incorrect");
         }
 
         const token: string = uuidv4();
-        const userId: number = user.rows[0].id;
+        const userId: number = user.id;
 
-        const verifySession: QueryResult = await authRepository.searchSession(userId);
+        const verifySession = await authRepository.searchSession(userId);
 
-        if (verifySession.rows[0]) {
+        if (verifySession) {
             return res.status(409).send("User is already logged in")
         }
 

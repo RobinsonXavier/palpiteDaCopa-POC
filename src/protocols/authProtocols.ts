@@ -1,5 +1,3 @@
-export type signUpUser = {
-    name:string,
-    email:string,
-    password:string
-};
+import { users } from "@prisma/client";
+
+export type signUp = Omit<users, "id">;

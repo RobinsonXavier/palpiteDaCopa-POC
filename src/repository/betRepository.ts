@@ -1,48 +1,85 @@
-import { QueryResult } from "pg";
-import connection from "../database/db.js";
+import { users, games, bets } from '@prisma/client';
 
-async function listBets(userId: number): Promise<QueryResult>  {
-    return await connection.query(`SELECT * FROM bets WHERE "userId" = $1;`
-    , [userId]);
+import prisma from '../database/db.js';
+
+async function listBets(userId: number): Promise<bets[]> {
+    return prisma.bets.findMany({
+        where: {
+            userId
+        }
+    })
 };
 
-async function checkUser(userId: number): Promise<QueryResult>  {
-    return await connection.query(`SELECT * FROM users WHERE id = $1;`
-    , [userId]);
+async function checkUser(userId: number): Promise<users> {
+    return prisma.users.findFirst({
+        where: {
+            id: userId
+        }
+    })
 };
 
-async function checkGame(gameId: number): Promise<QueryResult>  {
-    return await connection.query(`SELECT * FROM games WHERE id = $1;`
-    , [gameId]);
+async function checkGame(gameId: number): Promise<games> {
+    return prisma.games.findFirst({
+        where: {
+            id: gameId
+        }
+    })
 };
 
-async function insertBet(userId: number, gameId: number, bet: string): Promise<QueryResult>  {
-    return await connection.query(`INSERT INTO bets ("userId", "gameId", bet) VALUES ($1, $2, $3);`
-    , [userId, gameId, bet]);
+async function insertBet(userId: number, gameId: number, bet: string): Promise<bets> {
+    return prisma.bets.create({
+        data: {
+            userId,
+            gameId,
+            bet
+        }
+    })
 };
 
-async function updateBet(betId: number, bet: string): Promise<QueryResult>  {
-    return await connection.query(`UPDATE bets SET bet = $1 WHERE id = $2;`
-    , [bet, betId]);
+async function updateBet(betId: number, bet: string): Promise<bets> {
+    return prisma.bets.update({
+        where:{
+            id: betId
+        },
+        data: {
+            bet
+        }
+    })
 }
 
-async function checkBet(betId: number): Promise<QueryResult> {
-    return await connection.query(`SELECT * FROM bets WHERE id = $1;`
-    , [betId]);
+async function checkBet(betId: number): Promise<bets> {
+    return prisma.bets.findFirst({
+        where: {
+            id: betId
+        }
+    })
 }
 
-async function deleteBet(betId: number): Promise<QueryResult>  {
-    return await connection.query(`DELETE FROM bets WHERE id = $1;`
-    , [betId]);
+async function deleteBet(betId: number): Promise<bets> {
+    return prisma.bets.delete({
+        where: {
+            id: betId
+        }
+    })
 }
 
-async function listClosedGames(): Promise<QueryResult>  {
-    return await connection.query(`SELECT * FROM games WHERE status = 'closed';`);
+async function listClosedGames(): Promise<games[]> {
+    return prisma.games.findMany({
+        where: {
+            status: "closed"
+        }
+    })
 };
 
-async function updateUserHits(hits: number, userId: number): Promise<QueryResult> {
-    return await connection.query(`UPDATE users SET hits = $1 WHERE id = $2;`
-    , [hits, userId]);
+async function updateUserHits(hits: number, userId: number): Promise<users> {
+    return prisma.users.update({
+        where: {
+            id: userId
+        },
+        data: {
+            hits
+        }
+    })
 }
 
 export {

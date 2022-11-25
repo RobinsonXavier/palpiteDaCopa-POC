@@ -1,31 +1,53 @@
-import { QueryResult } from "pg";
-import connection from "../database/db.js";
+import { users, sessions } from "@prisma/client";
+import prisma from "../database/db.js";
+import { signUp } from '../protocols/authProtocols.js';
 
-async function insertUser (name:string, email:string, password:string): Promise<QueryResult> {
-    return await connection.query(`INSERT INTO users (name, email, password, hits) VALUES ($1, $2, $3, $4);`
-    , [name, email, password, 0]);
+async function insertUser (user: signUp): Promise<signUp>{
+    const result = await prisma.users.create({
+        data: user
+    });
+
+    return result;
 };
 
-async function searchEmail(email:string): Promise<QueryResult> {
-    return await connection.query(`SELECT * FROM users WHERE users.email = $1;`
-    , [email]);
+async function searchEmail(email:string): Promise<users>{
+    const result = await prisma.users.findFirst(
+        {
+            where: {
+                email
+            }
+        }
+    );
+
+    return result;
 }
 
-async function loginUser(userId: number, token: string): Promise<QueryResult> {
+async function loginUser(userId: number, token: string): Promise<sessions>{
     const status: number = Date.now();
 
-    return await connection.query(`INSERT INTO sessions ("userId", token, "lastStatus") VALUES ($1, $2, $3);`
-    , [userId, token, status]);
-
+    return prisma.sessions.create({
+        data: {
+            userId,
+            token,
+            lastStatus: status
+        }
+    })
 }
 
-async function searchSession(userId: number): Promise<QueryResult> {
-    return await connection.query(`SELECT * FROM sessions WHERE "userId" = $1;`
-    , [userId]);
+async function searchSession(userId: number): Promise<sessions> {
+    return prisma.sessions.findFirst({
+        where:{
+            userId
+        }
+    });
 }
 
-async function searchToken(token: string): Promise<QueryResult> {
-    return await connection.query(`SELECT * FROM sessions WHERE token = ${token};`);
+async function searchToken(token: string): Promise<sessions>{
+    return prisma.sessions.findFirst({
+        where:{
+            token
+        }
+    })
 };
 
 export {
